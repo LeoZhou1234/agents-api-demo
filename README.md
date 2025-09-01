@@ -33,10 +33,14 @@ npm install
 
 ### 4. Setup your API Key
 **Fetch your API key** from the [D-ID Studio](https://studio.d-id.com/account-settings) and paste it in the `api.json` file.
-[D-ID API Authentication](https://docs.d-id.com/reference/basic-authentication)
+
+API Documentation - [Basic Authentication](https://docs.d-id.com/reference/basic-authentication)
 
 ### 5. Configure Your Agent
-1. **Fetch your Agent ID** - From the D-ID Studio (`data-agent-id` in the Agent Embed option) or from the [API](https://docs.d-id.com/reference/listmyagents) 
+**Fetch your Agent ID**:
+- From the D-ID Studio: Agent Embed option - `data-agent-id` 
+- From API: [GET Agents Endpoint](https://docs.d-id.com/reference/listmyagents)
+
 Paste this value in the `agentID` variable in the `agents-streams-api.js` file.
 
 ### 6. Run the App
