@@ -14,7 +14,7 @@ This demo showcases the core features of the D-ID Agents API with Express and va
 ### 1. Clone the Repository
 ```sh
 git clone https://github.com/de-id/agents-api-demo.git
-cd agents-sdk-api-main
+cd agents-api-demo-main
 ```
 
 ### 2. Install Dependencies
