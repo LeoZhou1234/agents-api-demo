@@ -31,6 +31,14 @@
         <label for="chatOption" class="button" title="Chat Endpoint -> Communicate with your Agent (D-ID's LLM Response)">Chat</label>
         <input type="radio" id="speakOption" name="option" value="speak">
         <label for="speakOption" class="button" title="Speak Endpoint -> Streaming API (Repeats the input)">Speak</label>
+        <input type="radio" id="audioOption" name="option" value="audio">
+        <label for="audioOption" class="button" title="Voice Mode -> Auto speech-to-text and submit">Voice</label>
+      </div>
+      <div id="audioModeButtons" style="display: none; margin-top: 10px;">
+        <input type="radio" id="audioChatMode" name="audioMode" value="chat" checked>
+        <label for="audioChatMode" class="button" style="font-size: 0.9em;" title="Voice converted to text, sent to Chat endpoint">Chat Mode</label>
+        <input type="radio" id="audioSpeakMode" name="audioMode" value="speak">
+        <label for="audioSpeakMode" class="button" style="font-size: 0.9em;" title="Voice converted to text, sent to Speak endpoint">Speak Mode</label>
       </div>
       <div class="inputsDiv">
         <div class="mainInput">

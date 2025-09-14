@@ -15,7 +15,17 @@ recognition.onend = reset;
 recognition.onresult = function (event) {
   for (var i = event.resultIndex; i < event.results.length; ++i) {
     if (event.results[i].isFinal) {
-      textArea.value += event.results[i][0].transcript;
+      const transcript = event.results[i][0].transcript;
+      textArea.value += transcript;
+
+      // Auto-submit if in audio mode
+      const selectedOption = document.querySelector('input[name="option"]:checked')?.value;
+      if (selectedOption === 'audio') {
+        // Small delay to ensure UI updates, then auto-submit
+        setTimeout(() => {
+          handleAction();
+        }, 500);
+      }
     }
   }
 }
@@ -32,23 +42,47 @@ function reset() {
   interruptButton.removeAttribute("disabled")
 }
 
-function toggleStartStop() {
-  recognition.lang = recognition.lang
-  if (recognizing) {
-    textArea.focus()
-    recognition.stop();
-    reset();
-  } else {
-    textArea.value = ""
-    recognition.start();
-    recognizing = true;
-    speechButton.style.backgroundColor = "black"
-    speechButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" view-box="0 0 24 24" fill="none">
-    <path stroke="white" stroke-width="1.5" d="M7 8a5 5 0 0 1 10 0v3a5 5 0 0 1-10 0V8Z"/>
-    <path stroke="white" stroke-linecap="round" stroke-width="1.5" d="M11 8h2M10 11h4M20 10v1a8 8 0 1 1-16 0v-1M12 19v3"/>
-</svg>`
 
-    actionButton.setAttribute("disabled", true)
-    interruptButton.setAttribute("disabled", true)
-  }
+function toggleStartStop() {
+    const selectedOption = document.querySelector('input[name="option"]:checked')?.value;
+
+    if (selectedOption === 'audio') {
+        // Voice mode - speech-to-text with auto-submit
+        recognition.lang = recognition.lang;
+        if (recognizing) {
+            textArea.focus();
+            recognition.stop();
+            reset();
+        } else {
+            textArea.value = "";
+            recognition.start();
+            recognizing = true;
+            speechButton.style.backgroundColor = "green";
+            speechButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" view-box="0 0 24 24" fill="none">
+                <path stroke="white" stroke-width="1.5" d="M7 8a5 5 0 0 1 10 0v3a5 5 0 0 1-10 0V8Z"/>
+                <path stroke="white" stroke-linecap="round" stroke-width="1.5" d="M11 8h2M10 11h4M20 10v1a8 8 0 1 1-16 0v-1M12 19v3"/>
+            </svg>`;
+            actionButton.setAttribute("disabled", true);
+            interruptButton.setAttribute("disabled", true);
+        }
+    } else {
+        // Regular speech-to-text mode (Chat/Speak modes)
+        recognition.lang = recognition.lang;
+        if (recognizing) {
+            textArea.focus();
+            recognition.stop();
+            reset();
+        } else {
+            textArea.value = "";
+            recognition.start();
+            recognizing = true;
+            speechButton.style.backgroundColor = "black";
+            speechButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" view-box="0 0 24 24" fill="none">
+                <path stroke="white" stroke-width="1.5" d="M7 8a5 5 0 0 1 10 0v3a5 5 0 0 1-10 0V8Z"/>
+                <path stroke="white" stroke-linecap="round" stroke-width="1.5" d="M11 8h2M10 11h4M20 10v1a8 0 1 1-16 0v-1M12 19v3"/>
+            </svg>`;
+            actionButton.setAttribute("disabled", true);
+            interruptButton.setAttribute("disabled", true);
+        }
+    }
 }

@@ -34,8 +34,75 @@ let isFluent = false; // set from stream session 'fluent' flag
 let isStreamReady = false;
 let isStreamPlaying = false;
 let currentVideoId = null;
+let qaCounter = 0; // Counter for Q&A pairs
 
 // ===== Helper Functions =====
+
+// LocalStorage functions for Q&A storage using hash objects
+function initializeQACounter() {
+    const stored = localStorage.getItem('qa_counter');
+    qaCounter = stored ? parseInt(stored, 10) : 0;
+}
+
+function storeQuestion(question) {
+    qaCounter++;
+    const exchangeKey = `exchange_${qaCounter}`;
+
+    const exchangeData = {
+        id: qaCounter,
+        question: question,
+        answer: null,
+        timestamp: new Date().toISOString(),
+        status: 'waiting_for_answer'
+    };
+
+    localStorage.setItem('qa_counter', qaCounter.toString());
+    localStorage.setItem(exchangeKey, JSON.stringify(exchangeData));
+    console.log(`Stored ${exchangeKey}:`, exchangeData);
+}
+
+function storeAnswer(answer) {
+    const exchangeKey = `exchange_${qaCounter}`;
+    const existingData = localStorage.getItem(exchangeKey);
+
+    if (existingData) {
+        const exchangeData = JSON.parse(existingData);
+        exchangeData.answer = answer;
+        exchangeData.status = 'completed';
+        exchangeData.answerTimestamp = new Date().toISOString();
+
+        localStorage.setItem(exchangeKey, JSON.stringify(exchangeData));
+        console.log(`Updated ${exchangeKey} with answer:`, exchangeData);
+    }
+}
+
+function getStoredQAPairs() {
+    const count = parseInt(localStorage.getItem('qa_counter') || '0', 10);
+    const pairs = [];
+
+    for (let i = 1; i <= count; i++) {
+        const exchangeKey = `exchange_${i}`;
+        const storedData = localStorage.getItem(exchangeKey);
+
+        if (storedData) {
+            try {
+                const exchangeData = JSON.parse(storedData);
+                pairs.push({
+                    id: exchangeData.id,
+                    question: exchangeData.question,
+                    answer: exchangeData.answer || 'No answer recorded',
+                    timestamp: exchangeData.timestamp,
+                    answerTimestamp: exchangeData.answerTimestamp,
+                    status: exchangeData.status
+                });
+            } catch (error) {
+                console.error(`Error parsing ${exchangeKey}:`, error);
+            }
+        }
+    }
+    return pairs;
+}
+
 async function fetchWithRetry(url, options, retries = 3) {
     try {
         const res = await fetch(url, options);
@@ -111,6 +178,54 @@ async function handleAction() {
     const selectedOption = document.querySelector('input[name="option"]:checked')?.value;
     if (selectedOption === 'chat') return chat();
     if (selectedOption === 'speak') return speak();
+    if (selectedOption === 'audio') return handleAudioInput();
+}
+
+// Make handleAction globally accessible for webSpeechAPI.js
+window.handleAction = handleAction;
+
+// Make Q&A functions globally accessible for analysis
+window.getStoredQAPairs = getStoredQAPairs;
+window.clearQAStorage = function() {
+    const count = parseInt(localStorage.getItem('qa_counter') || '0', 10);
+
+    // Remove all exchange objects
+    for (let i = 1; i <= count; i++) {
+        const exchangeKey = `exchange_${i}`;
+        localStorage.removeItem(exchangeKey);
+    }
+
+    // Remove counter
+    localStorage.removeItem('qa_counter');
+    qaCounter = 0;
+    console.log('All Q&A exchange objects cleared from localStorage');
+};
+
+// Additional utility function to get a specific exchange
+window.getExchange = function(exchangeId) {
+    const exchangeKey = `exchange_${exchangeId}`;
+    const storedData = localStorage.getItem(exchangeKey);
+
+    if (storedData) {
+        try {
+            return JSON.parse(storedData);
+        } catch (error) {
+            console.error(`Error parsing ${exchangeKey}:`, error);
+            return null;
+        }
+    }
+    return null;
+};
+
+async function handleAudioInput() {
+    const audioMode = document.querySelector('input[name="audioMode"]:checked')?.value || 'chat';
+
+    // Voice mode always uses speech-to-text conversion
+    if (audioMode === 'chat') {
+        return chat();
+    } else {
+        return speak();
+    }
 }
 
 // ===== Main Functions =====
@@ -263,6 +378,10 @@ async function connect() {
         if (msg.includes('chat/answer')) {
             msg = decodeURIComponent(msg.replace('chat/answer:', ''));
             console.log('Agent:', msg);
+
+            // Store answer in localStorage
+            storeAnswer(msg);
+
             answers.innerHTML += `<div class='agentMessage'> ${msg}</div><br>`;
             answers.scrollTo({ top: answers.scrollHeight + 50, behavior: 'smooth' });
         }
@@ -290,7 +409,7 @@ async function connect() {
             }
         }
     };
-    
+
 // Interrupt Button logic
     interruptButton.onclick = () => {
         if (!currentVideoId) return;
@@ -319,6 +438,10 @@ async function chat() {
     if (!val) return;
     textArea.value = '';
     console.log('Sending chat text:', val);
+
+    // Store question in localStorage
+    storeQuestion(val);
+
     answers.innerHTML += `<div class='userMessage'> ${val}</div><br>`;
     answers.scrollTo({ top: answers.scrollHeight + 50, behavior: 'smooth' });
     const payload = {
@@ -347,8 +470,13 @@ async function speak() {
     });
 }
 
+
+
 // On page load actions
 (async function onPageLoad() {
+
+    // Initialize Q&A counter from localStorage
+    initializeQACounter();
 
     // Focus text area and disable action buttons until connected
     textArea.focus();
@@ -365,6 +493,26 @@ async function speak() {
     connectButton.addEventListener('click', () => connect());
     actionButton.addEventListener('click', handleAction);
     speechButton.addEventListener('click', () => toggleStartStop?.());
+
+    // Show/hide audio mode buttons based on selected option
+    document.querySelectorAll('input[name="option"]').forEach(radio => {
+        radio.addEventListener('change', () => {
+            const audioModeButtons = document.getElementById('audioModeButtons');
+            const textAreaPlaceholder = document.getElementById('textArea');
+
+            if (radio.value === 'audio' && radio.checked) {
+                audioModeButtons.style.display = 'block';
+                textAreaPlaceholder.placeholder = 'Use microphone button — Auto speech-to-text and submit';
+            } else if (radio.checked) {
+                audioModeButtons.style.display = 'none';
+                if (radio.value === 'chat') {
+                    textAreaPlaceholder.placeholder = "Write something — 'Chat' replies, 'Speak' repeats.";
+                } else {
+                    textAreaPlaceholder.placeholder = "Write something — 'Chat' replies, 'Speak' repeats.";
+                }
+            }
+        });
+    });
 
     // Auto-connect for demo
     connectButton.click();
