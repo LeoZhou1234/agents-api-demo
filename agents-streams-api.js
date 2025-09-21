@@ -1,13 +1,13 @@
 'use strict';
-const fetchJsonFile = await fetch('./api.json');
-const DID_API = await fetchJsonFile.json();
-if (DID_API.key == '🤫') alert('Please put your api key inside ./api.json and restart..');
-
+//const fetchJsonFile = await fetch('./api.json');
+//const DID_API = await fetchJsonFile.json();
+//if (DID_API.key == process.env.DID_API_KEY) alert('Please put your api key inside ./api.json and restart..');
+const DID_API = { key: process.env.DID_API_KEY, url: 'https://api.d-id.com' };
 
 // Set your Agent ID.
 // In D-ID Studio: open your agent → Embed settings → copy the value of `data-agent-id` and paste it below.
 // You can also create an Agent via API: POST /agents.) Docs: https://docs.d-id.com/reference/createagent
-let agentId = '';
+let agentId = 'agt__uA1wt2j';
 
 
 // ===== DOM refs and states =====
