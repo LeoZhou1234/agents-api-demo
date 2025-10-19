@@ -29,20 +29,12 @@
       <div id="buttons">
         <input type="radio" id="chatOption" name="option" value="chat" checked>
         <label for="chatOption" class="button" title="Chat Endpoint -> Communicate with your Agent (D-ID's LLM Response)">Chat</label>
-        <input type="radio" id="speakOption" name="option" value="speak">
-        <label for="speakOption" class="button" title="Speak Endpoint -> Streaming API (Repeats the input)">Speak</label>
         <input type="radio" id="audioOption" name="option" value="audio">
         <label for="audioOption" class="button" title="Voice Mode -> Auto speech-to-text and submit">Voice</label>
       </div>
-      <div id="audioModeButtons" style="display: none; margin-top: 10px;">
-        <input type="radio" id="audioChatMode" name="audioMode" value="chat" checked>
-        <label for="audioChatMode" class="button" style="font-size: 0.9em;" title="Voice converted to text, sent to Chat endpoint">Chat Mode</label>
-        <input type="radio" id="audioSpeakMode" name="audioMode" value="speak">
-        <label for="audioSpeakMode" class="button" style="font-size: 0.9em;" title="Voice converted to text, sent to Speak endpoint">Speak Mode</label>
-      </div>
       <div class="inputsDiv">
         <div class="mainInput">
-          <textarea id="textArea" placeholder="Write something — ‘Chat’ replies, ‘Speak’ repeats." autofocus></textarea>
+          <textarea id="textArea" placeholder="Write something or use voice mode to chat with the agent." autofocus></textarea>
           <button id="speechButton" class="roundButton" title="Speech to Text - Web Speech API (MDN)"></button>
           <button id="actionButton" class="roundButton" title="Send Message">
             <svg xmlns="http://www.w3.org/2000/svg" width="26" height="27" viewBox="0 0 26 27" fill="none">

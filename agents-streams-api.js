@@ -1,9 +1,13 @@
 'use strict';
 const fetchJsonFile = await fetch('./api.json');
 const DID_API = await fetchJsonFile.json();
+<<<<<<< Updated upstream
 
 // if (DID_API.key == process.env.DID_API_KEY) alert('Please put your api key inside ./api.json and restart..');
 // const DID_API = { key: process.env.DID_API_KEY, url: 'https://api.d-id.com' };
+=======
+if (DID_API.key == 'YOUR_API_KEY') alert('Please put your api key inside ./api.json and restart..');
+>>>>>>> Stashed changes
 
 // Set your Agent ID.
 // In D-ID Studio: open your agent → Embed settings → copy the value of `data-agent-id` and paste it below.
@@ -178,7 +182,6 @@ function switchModes() {
 async function handleAction() {
     const selectedOption = document.querySelector('input[name="option"]:checked')?.value;
     if (selectedOption === 'chat') return chat();
-    if (selectedOption === 'speak') return speak();
     if (selectedOption === 'audio') return handleAudioInput();
 }
 
@@ -219,14 +222,8 @@ window.getExchange = function(exchangeId) {
 };
 
 async function handleAudioInput() {
-    const audioMode = document.querySelector('input[name="audioMode"]:checked')?.value || 'chat';
-
-    // Voice mode always uses speech-to-text conversion
-    if (audioMode === 'chat') {
-        return chat();
-    } else {
-        return speak();
-    }
+    // Voice mode always uses speech-to-text conversion and sends to chat
+    return chat();
 }
 
 // ===== Main Functions =====
@@ -495,22 +492,15 @@ async function speak() {
     actionButton.addEventListener('click', handleAction);
     speechButton.addEventListener('click', () => toggleStartStop?.());
 
-    // Show/hide audio mode buttons based on selected option
+    // Update placeholder text based on selected option
     document.querySelectorAll('input[name="option"]').forEach(radio => {
         radio.addEventListener('change', () => {
-            const audioModeButtons = document.getElementById('audioModeButtons');
             const textAreaPlaceholder = document.getElementById('textArea');
 
             if (radio.value === 'audio' && radio.checked) {
-                audioModeButtons.style.display = 'block';
                 textAreaPlaceholder.placeholder = 'Use microphone button — Auto speech-to-text and submit';
             } else if (radio.checked) {
-                audioModeButtons.style.display = 'none';
-                if (radio.value === 'chat') {
-                    textAreaPlaceholder.placeholder = "Write something — 'Chat' replies, 'Speak' repeats.";
-                } else {
-                    textAreaPlaceholder.placeholder = "Write something — 'Chat' replies, 'Speak' repeats.";
-                }
+                textAreaPlaceholder.placeholder = 'Write something or use voice mode to chat with the agent.';
             }
         });
     });
